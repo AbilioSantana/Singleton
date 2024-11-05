@@ -1,0 +1,48 @@
+public class ConfigManager
+{
+    private static ConfigManager _instance;
+    private static readonly object _syncLock = new object();
+    public string ConnectionString { get; private set; }
+    public int ConnectionTimeout { get; private set; }
+
+    private ConfigManager()
+    {
+        ConnectionString = "Servidor=enderecoServidor;Banco=meuBanco;";
+        ConnectionTimeout = 30;
+    }
+
+    public static ConfigManager GetConfig()
+    {
+        lock (_syncLock)
+        {
+            if (_instance == null)
+            {
+                _instance = new ConfigManager();
+            }
+        }
+        return _instance;
+    }
+
+    public void UpdateSettings(string newConnectionString, int newTimeout)
+    {
+        ConnectionString = newConnectionString;
+        ConnectionTimeout = newTimeout;
+    }
+}
+
+class Application
+{
+    static void Main(string[] args)
+    {
+        ConfigManager config = ConfigManager.GetConfig();
+
+        Console.WriteLine($"Conexão: {config.ConnectionString}");
+        Console.WriteLine($"Tempo de Espera: {config.ConnectionTimeout}");
+
+        config.UpdateSettings("Servidor=novoEnderecoServidor;Banco=novoBanco;", 60);
+
+        ConfigManager updatedConfig = ConfigManager.GetConfig();
+        Console.WriteLine($"Conexão Atualizada: {updatedConfig.ConnectionString}");
+        Console.WriteLine($"Tempo de Espera Atualizado: {updatedConfig.ConnectionTimeout}");
+    }
+}
